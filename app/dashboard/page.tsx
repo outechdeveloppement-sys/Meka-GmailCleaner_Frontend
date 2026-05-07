@@ -127,13 +127,21 @@ export default function DashboardPage() {
     setAnalysisStatus("Connexion sécurisée à Gmail...");
     
     try {
-      // Simulation d'étapes pour la fluidité
-      setTimeout(() => { setAnalysisProgress(30); setAnalysisStatus("Récupération des métadonnées (50 derniers messages)..."); }, 1000);
-      setTimeout(() => { setAnalysisProgress(50); setAnalysisStatus("Analyse des patterns d'envoi et fréquences..."); }, 2500);
-      setTimeout(() => { setAnalysisProgress(70); setAnalysisStatus("Interrogation de Meka pour des suggestions personnalisées..."); }, 4000);
-      setTimeout(() => { setAnalysisProgress(90); setAnalysisStatus("Génération de vos nouvelles règles de nettoyage..."); }, 6000);
+      // Simulation d'étapes visuelles
+      const statusInterval = setInterval(() => {
+        setAnalysisProgress(prev => {
+          if (prev < 90) return prev + 5;
+          return prev;
+        });
+      }, 1000);
 
       const res = await analyzeMailbox();
+      clearInterval(statusInterval);
+      
+      if (res.detail) {
+        throw new Error(res.detail);
+      }
+
       setAnalysisProgress(100);
       setAnalysisStatus("Analyse terminée !");
       
@@ -142,8 +150,9 @@ export default function DashboardPage() {
         setAnalyzing(false);
         toast.success("Analyse terminée ! Découvrez vos suggestions.");
       }, 500);
-    } catch (e) {
-      toast.error("Erreur d'analyse");
+    } catch (e: any) {
+      console.error("Erreur d'analyse:", e);
+      toast.error(`Erreur d'analyse : ${e.message || "Le service est temporairement indisponible"}`);
       setAnalyzing(false);
     }
   };
