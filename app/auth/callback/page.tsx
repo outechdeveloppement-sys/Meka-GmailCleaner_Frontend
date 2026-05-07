@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signInWithCustomToken } from "firebase/auth";
@@ -8,7 +8,7 @@ import { sendAuthCallback } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
@@ -48,5 +48,18 @@ export default function AuthCallbackPage() {
       <h1 className="text-xl font-bold">Liaison de votre compte Gmail...</h1>
       <p className="text-gray-400 mt-2">Vous allez être redirigé vers le tableau de bord.</p>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050505] text-white">
+        <Loader2 className="animate-spin text-blue-500 mb-4" size={48} />
+        <h1 className="text-xl font-bold">Chargement de l'authentification...</h1>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
